@@ -11,9 +11,18 @@ import torch
 from model import LeNet
 import torch.nn as nn
 
-# 以脚本所在目录为基准，避免因启动目录不同导致数据被下载到别处
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_ROOT = os.path.join(BASE_DIR, 'data')
+# =====================================================================
+# 路径策略：所有路径都以“本代码文件所在目录”为基准（相对定位，
+# 代码里不出现任何写死的盘符，如 d:/...）。
+# 好处：
+#   1. 无论在哪个目录下启动脚本，数据、模型都会落在本项目文件夹内；
+#   2. 整个 LeNet 文件夹可直接复制改名成 AlexNet 等新项目复用，
+#      无需修改任何路径。
+# =====================================================================
+PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))  # 当前项目文件夹，即 pytorch_test/LeNet
+DATA_ROOT = os.path.join(PROJECT_DIR, 'data')             # 数据集目录（下载/读取都在这里）
+MODEL_DIR = PROJECT_DIR                                   # 最优模型保存目录 = 当前项目文件夹内
+BEST_MODEL_PATH = os.path.join(MODEL_DIR, 'best_model.pth')  # 最优模型文件
 
 
 # 数据加载
@@ -136,7 +145,10 @@ def train_model_process(model, train_dataloader, val_dataloader, num_epochs):
     # 选择最优参数
     # 加载最高准确率下的模型参数
     model.load_state_dict(best_model_wts)
-    torch.save(best_model_wts, os.path.join(BASE_DIR, 'best_model.pth'))
+    # 保存最优模型（相对本代码文件所在目录，模型落在当前项目文件夹内）
+    os.makedirs(MODEL_DIR, exist_ok=True)
+    torch.save(best_model_wts, BEST_MODEL_PATH)
+    print('最优模型已保存到: {}'.format(BEST_MODEL_PATH))
 
     train_process = pd.DataFrame(data={"epoch": range(len(train_loss_all)),
                                        "train_loss_all": train_loss_all,
