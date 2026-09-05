@@ -1,4 +1,5 @@
 import copy
+import os
 import time
 
 import pandas as pd
@@ -10,10 +11,14 @@ import torch
 from model import LeNet
 import torch.nn as nn
 
+# 以脚本所在目录为基准，避免因启动目录不同导致数据被下载到别处
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_ROOT = os.path.join(BASE_DIR, 'data')
+
 
 # 数据加载
 def train_val_data_process():
-    train_data = FashionMNIST(root='./data',
+    train_data = FashionMNIST(root=DATA_ROOT,
                               train=True,
                               transform=transforms.Compose([transforms.Resize(size=28), transforms.ToTensor(), ]),
                               download=True)
@@ -22,12 +27,12 @@ def train_val_data_process():
     train_dataloader = Data.DataLoader(dataset=train_data,
                                        batch_size=128,
                                        shuffle=True,
-                                       num_workers=8)
+                                       num_workers=2)
 
     val_dataloader = Data.DataLoader(dataset=val_data,
                                      batch_size=128,
                                      shuffle=True,
-                                     num_workers=8)
+                                     num_workers=2)
 
     return train_dataloader, val_dataloader
 
@@ -131,7 +136,7 @@ def train_model_process(model, train_dataloader, val_dataloader, num_epochs):
     # 选择最优参数
     # 加载最高准确率下的模型参数
     model.load_state_dict(best_model_wts)
-    torch.save(best_model_wts, './best_model.pth')
+    torch.save(best_model_wts, os.path.join(BASE_DIR, 'best_model.pth'))
 
     train_process = pd.DataFrame(data={"epoch": range(len(train_loss_all)),
                                        "train_loss_all": train_loss_all,

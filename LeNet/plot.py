@@ -1,10 +1,15 @@
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 import torch.utils.data as Data
 from torchvision import transforms
 from torchvision.datasets import FashionMNIST
 
-train_data = FashionMNIST(root='./data',
+# 以脚本所在目录为基准，避免因启动目录不同导致数据被下载到别处
+DATA_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
+
+train_data = FashionMNIST(root=DATA_ROOT,
                           train=True,
                           transform=transforms.Compose([transforms.Resize(size=224), transforms.ToTensor(), ]),
                           download=True)
