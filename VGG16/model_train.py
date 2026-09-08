@@ -8,7 +8,7 @@ import torch.utils.data as Data
 from torchvision import transforms
 from torchvision.datasets import FashionMNIST
 import torch
-from model import LeNet
+from model import VGG16
 import torch.nn as nn
 
 # =====================================================================
@@ -29,19 +29,20 @@ BEST_MODEL_PATH = os.path.join(MODEL_DIR, 'best_model.pth')  # 最优模型文�
 def train_val_data_process():
     train_data = FashionMNIST(root=DATA_ROOT,
                               train=True,
-                              transform=transforms.Compose([transforms.Resize(size=28), transforms.ToTensor(), ]),
+                              transform=transforms.Compose([transforms.Resize(size=224), transforms.ToTensor(), ]),
                               download=True)
     train_data, val_data = Data.random_split(train_data, [round(0.8 * len(train_data)), round(0.2 * len(train_data))])
 
     train_dataloader = Data.DataLoader(dataset=train_data,
-                                       batch_size=128,
+                                       batch_size=64,
+
                                        shuffle=True,
-                                       num_workers=0)
+                                       num_workers=2)
 
     val_dataloader = Data.DataLoader(dataset=val_data,
-                                     batch_size=128,
+                                     batch_size=64,
                                      shuffle=True,
-                                     num_workers=0)
+                                     num_workers=2)
 
     return train_dataloader, val_dataloader
 
@@ -49,6 +50,7 @@ def train_val_data_process():
 # 模型训练
 def train_model_process(model, train_dataloader, val_dataloader, num_epochs):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print("Using device:", device)  # 调试时务必看一眼
 
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)  # 设置优化器,lr是学习率
     criterion = nn.CrossEntropyLoss()  # 交叉熵损失函数
@@ -88,6 +90,7 @@ def train_model_process(model, train_dataloader, val_dataloader, num_epochs):
         for step, (b_x, b_y) in enumerate(train_dataloader):
             b_x = b_x.to(device)
             b_y = b_y.to(device)
+
             # 输入为一个batch,输出为一个batch中的预测
             output = model(b_x)
             # 通过一个softmax转化为概率,取概率最大的一个值作为标签
@@ -180,7 +183,7 @@ def matplot_acc_loss(train_process):
 
 
 if __name__ == "__main__":
-    LeNet = LeNet()
+    VGG16 = VGG16()
     train_dataloader, val_dataloader = train_val_data_process()
-    train_process = train_model_process(LeNet, train_dataloader, val_dataloader, 20)
+    train_process = train_model_process(VGG16, train_dataloader, val_dataloader, 20)
     matplot_acc_loss(train_process)
