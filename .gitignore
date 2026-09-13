@@ -4,3 +4,7 @@ data/
 __pycache__/
 .idea/
 .vscode/
+.codebuddy/
+
+# 独立实验仓库（已单独 git init，不再纳入本仓库跟踪）
+GoogLeNet_with_my_data/
